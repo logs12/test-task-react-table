@@ -11,7 +11,7 @@ const Container = styled.div`
   height: 100%;
 `;
 
-export default ({ push }) => {
+export default () => {
   return (
     <Container>
       <Link to={routes.table}>Go to table</Link>

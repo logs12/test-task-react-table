@@ -6,19 +6,19 @@ import * as DATA from "@/constants/data";
 
 function* handleFetchData(action) {
   try {
-    const { page, limits } = action.payload;
+    const { page, limits } = action;
     const responseData = yield call(API.get, apiData, {
       params: { _page: page, _limits: limits },
     });
     yield put({
       type: DATA.FETCH_DATA_SUCCESS,
-      payload: responseData.data,
+      data: responseData.data,
     });
   } catch (e) {
     if (!axios.isCancel(e)) {
       yield put({
         type: DATA.FETCH_DATA_ERROR,
-        payload: { e },
+        error: { e },
       });
     }
   }

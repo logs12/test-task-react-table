@@ -8,10 +8,10 @@ export type DataItem = {
   readonly body: string;
 };
 
-export type DataState = {
+export interface DataState {
   data: DataItem[];
   isPending: IsPending;
-};
+}
 
 export const defaultOwnerRepositoryState = {
   get state(): DataItem {

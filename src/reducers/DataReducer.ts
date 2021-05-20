@@ -5,23 +5,25 @@ import {
 } from "@/constants/data";
 
 import * as DataModel from "@/models/DataModel";
+import { TCommentsAction } from "@/actions/CommentsActionTypes";
 
 export function dataReducer(
   state: DataModel.DataState = DataModel.initialState.state,
-  action
-) {
+  action: TCommentsAction
+): DataModel.DataState {
   switch (action.type) {
     case FETCH_DATA:
       return {
         ...state,
         isPending: true,
       };
-    case FETCH_DATA_SUCCESS:
+    case FETCH_DATA_SUCCESS: {
       return {
         ...state,
-        data: [...state.data, ...action.payload],
+        data: [...state.data, ...action.data],
         isPending: false,
       };
+    }
     case FETCH_DATA_ERROR:
       return {
         ...state,

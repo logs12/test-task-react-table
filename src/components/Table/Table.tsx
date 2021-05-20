@@ -2,16 +2,8 @@ import React, { PropsWithChildren, ReactElement, useEffect } from "react";
 import styled from "styled-components";
 import {
   ColumnInstance,
-  Column,
-  ColumnInterface,
-  ColumnGroup,
   FilterProps,
-  HeaderGroup,
   HeaderProps,
-  Hooks,
-  Meta,
-  Row,
-  TableInstance,
   TableOptions,
   useColumnOrder,
   useFilters,
@@ -21,6 +13,7 @@ import {
   useTable,
 } from "react-table";
 import { TableSortLabel, TextField } from "@material-ui/core";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { camelToWords } from "@/utils";
 import { FilterChipBar } from "./FilterChipBar";
 import { fuzzyTextFilter } from "./filters";
@@ -70,15 +63,12 @@ const DefaultHeader: React.FC<HeaderProps<any>> = ({ column }) => (
 const defaultColumn = {
   Filter: DefaultColumnFilter,
   Header: DefaultHeader,
-  // When using the useFlexLayout:
-  minWidth: 30, // minWidth is only used as a limit for resizing
-  width: 150, // width is used for both the flex-basis and flex-grow
-  maxWidth: 200, // maxWidth is only used as a limit for resizing
+  minWidth: 30,
+  width: 150,
+  maxWidth: 200,
 };
 
 const Styles = styled.div`
-  padding: 1rem;
-
   table {
     border-spacing: 0;
     border: 1px solid black;
@@ -111,7 +101,10 @@ const filterTypes = {
 };
 
 export interface TableProperties<T extends Record<string, unknown>>
-  extends TableOptions<T> {}
+  extends TableOptions<T> {
+  fetchMoreData: () => void;
+  tableHeight: number;
+}
 
 export function Table<T extends Record<string, unknown>>(
   props: PropsWithChildren<TableProperties<T>>
@@ -130,57 +123,72 @@ export function Table<T extends Record<string, unknown>>(
     useFlexLayout
   );
 
-  const { rows, getTableProps, headerGroups, getTableBodyProps, prepareRow } =
-    instance;
-
-  // Render the UI for your table
+  const { fetchMoreData, tableHeight } = props;
+  const {
+    rows,
+    getTableProps,
+    headerGroups,
+    getTableBodyProps,
+    prepareRow,
+    state: { filters },
+  } = instance;
   return (
     <Styles>
       <TableToolbar instance={instance} />
       <FilterChipBar<T> instance={instance} />
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => {
-                return (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {column.canSort ? (
-                      <TableSortLabel
-                        active={column.isSorted}
-                        direction={column.isSortedDesc ? "desc" : "asc"}
-                        {...column.getSortByToggleProps()}
-                        className={classes.tableSortLabel}
-                      >
-                        {column.render("Header")}
-                      </TableSortLabel>
-                    ) : (
-                      <div className={classes.tableLabel}>
-                        {column.render("Header")}
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
+      <InfiniteScroll
+        dataLength={rows.length}
+        next={fetchMoreData}
+        hasMore={!filters.length}
+        height={tableHeight}
+        loader={<h4>Loading more items...</h4>}
+      >
+        <table {...getTableProps()}>
+          <thead>
+            {headerGroups.map((headerGroup) => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => {
                   return (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                    <th
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                    >
+                      {column.canSort ? (
+                        <TableSortLabel
+                          active={column.isSorted}
+                          direction={column.isSortedDesc ? "desc" : "asc"}
+                          {...column.getSortByToggleProps()}
+                          className={classes.tableSortLabel}
+                        >
+                          {column.render("Header")}
+                        </TableSortLabel>
+                      ) : (
+                        <div className={classes.tableLabel}>
+                          {column.render("Header")}
+                        </div>
+                      )}
+                    </th>
                   );
                 })}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </thead>
+
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row, i) => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()}>
+                  {row.cells.map((cell) => {
+                    return (
+                      <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </InfiniteScroll>
     </Styles>
   );
 }

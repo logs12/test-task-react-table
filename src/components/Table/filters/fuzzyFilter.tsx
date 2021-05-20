@@ -11,5 +11,4 @@ export function fuzzyTextFilter<T extends Record<string, unknown>>(
   });
 }
 
-// Let the table remove the filter if the string is empty
-fuzzyTextFilter.autoRemove = (val: any) => !val;
+fuzzyTextFilter.autoRemove = (val: string) => !val;

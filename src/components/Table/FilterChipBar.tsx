@@ -33,10 +33,7 @@ type FilterChipBarProps<T extends Record<string, unknown>> = {
   instance: TableInstance<T>;
 };
 
-const getFilterValue = (
-  column: ColumnInstance<any>,
-  filterValue: FilterValue
-) => {
+const getFilterValue = (column: ColumnInstance, filterValue: FilterValue) => {
   switch (column.filter) {
     case "between": {
       const min = filterValue[0];

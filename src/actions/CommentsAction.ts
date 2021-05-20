@@ -1,41 +1,34 @@
-import { Action } from "@/actions/ActionCreatorTypings";
-import { DataState } from "@/models/DataModel";
+import { DataItem } from "@/models/DataModel";
 import {
   FETCH_DATA,
   FETCH_DATA_SUCCESS,
   FETCH_DATA_ERROR,
 } from "@/constants/data";
+import {
+  CommentsDataActionPayload,
+  GetCommentsDataSuccessActionPayloadType,
+  GetCommentsDataErrorActionPayloadType,
+} from "@/actions/CommentsActionTypes";
 
-export type CommentsDataActionPayload = Record<string, unknown>;
-export interface CommentsDataAction {
-  (page: number, limits?: number): Action<CommentsDataActionPayload>;
-}
 export const getCommentsDataAction = (
-  page,
+  page: number,
   limits = 10
-): Action<CommentsDataActionPayload> => ({
+): CommentsDataActionPayload => ({
   type: FETCH_DATA,
-  payload: {
-    page,
-    limits,
-  },
+  page,
+  limits,
 });
 
-type GetCommentsDataSuccessActionPayloadType = {
-  data: DataState;
-};
 export const getCommentsDataSuccessAction = (
-  data: DataState
-): Action<GetCommentsDataSuccessActionPayloadType> => ({
+  data: DataItem[]
+): GetCommentsDataSuccessActionPayloadType => ({
   type: FETCH_DATA_SUCCESS,
-  payload: {
-    data,
-  },
+  data,
 });
 
-type GetCommentsDataErrorActionPayloadType = Record<string, unknown>;
-export const getCommentsDataErrorAction =
-  (): Action<GetCommentsDataErrorActionPayloadType> => ({
-    type: FETCH_DATA_ERROR,
-    payload: {},
-  });
+export const getCommentsDataErrorAction = (
+  error: string
+): GetCommentsDataErrorActionPayloadType => ({
+  type: FETCH_DATA_ERROR,
+  error,
+});

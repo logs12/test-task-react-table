@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { Direction } from "re-resizable/lib/resizer";
 import { NumberSize, Resizable } from "re-resizable";
 
 import { Table } from "@/components/Table";
 import { DataItem } from "@/models/DataModel";
-import { CommentsDataAction } from "@/actions/CommentsAction";
+import { CommentsDataAction } from "@/actions/CommentsActionTypes";
 import { useLocalStorage } from "@/utils";
 
 const Container = styled.div`
@@ -17,7 +16,7 @@ const Container = styled.div`
     "asideLeft header header header asideRight"
     "asideLeft content content content asideRight"
     "asideLeft content content content asideRight";
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-rows: repeat(5, minmax(auto, auto));
   grid-template-columns: repeat(5, 1fr);
   position: absolute;
   width: 100%;
@@ -59,11 +58,11 @@ interface Props {
   getCommentsDataAction: CommentsDataAction;
 }
 
-const defaultTableHeight = 350;
+const defaultTableHeight = 500;
 
 export default ({ data, getCommentsDataAction }: Props) => {
   const [numberPage, setNumberPage] = useState(1);
-  const [tableHeight, setTableHeight] = useLocalStorage(
+  const [tableHeight, setTableHeight] = useLocalStorage<number>(
     `tableHeight`,
     defaultTableHeight
   );
@@ -90,7 +89,6 @@ export default ({ data, getCommentsDataAction }: Props) => {
     getCommentsDataAction(newNumberPage);
     setNumberPage(newNumberPage);
   };
-
   return (
     <Container>
       <AsideLeft />
@@ -102,20 +100,18 @@ export default ({ data, getCommentsDataAction }: Props) => {
         }}
         style={{
           gridArea: "content",
-          overflowX: "clip",
+          overflow: "hidden",
           background: "#f0f0f0",
         }}
         onResizeStop={handleResize}
       >
-        <InfiniteScroll
-          dataLength={data.length}
-          next={fetchMoreData}
-          hasMore
-          height={tableHeight}
-          loader={<h4>Loading more items...</h4>}
-        >
-          <Table<DataItem> name="testTable" columns={columns} data={data} />
-        </InfiniteScroll>
+        <Table<DataItem>
+          name="testTable"
+          columns={columns}
+          data={data}
+          fetchMoreData={fetchMoreData}
+          tableHeight={tableHeight}
+        />
       </Resizable>
       <AsideRight />
     </Container>
